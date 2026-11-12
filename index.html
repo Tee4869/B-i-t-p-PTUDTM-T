@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8fafc">
+    <meta name="description" content="Portfolio của Phạm Ngọc Minh Thư - Logistics, thương mại điện tử và vận hành kinh doanh.">
+    <title>Phạm Ngọc Minh Thư | Logistics, E-commerce &amp; Sales Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#1E3A8A',
+                            900: '#0F172A',
+                        },
+                        accent: {
+                            500: '#0284C7',
+                            600: '#0369A1',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .card-hover {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.12);
+        }
+        @keyframes spin-slow {
+            to { transform: rotate(360deg); }
+        }
+        .music-playing {
+            animation: spin-slow 6s linear infinite;
+        }
+        #bubble-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 40;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-accent-500 selection:text-white">
+    <canvas id="bubble-canvas" aria-hidden="true"></canvas>
+    <audio id="bg-music" loop preload="none">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="fixed bottom-6 right-6 z-50 flex items-center gap-2.5">
+        <span id="music-status-text" role="status" aria-live="polite" class="rounded-full bg-navy-900/90 px-3 py-1.5 text-xs font-medium text-white shadow-md backdrop-blur-sm">
+            Nhạc nền: Tắt
+        </span>
+        <button id="music-toggle-btn" type="button" aria-label="Bật nhạc nền" aria-pressed="false"
+                class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gradient-to-tr from-navy-900 to-accent-500 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl">
+            <i id="music-icon" data-lucide="disc-3" class="h-5 w-5" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div id="bubble-message" class="pointer-events-none fixed left-1/2 top-24 z-50 hidden -translate-x-1/2 rounded-2xl bg-navy-900 px-5 py-3 text-center text-sm font-semibold text-white shadow-xl" role="status" aria-live="polite"></div>
+
+    <header class="fixed inset-x-0 top-0 z-50 glass-nav border-b border-slate-200/70">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between md:h-20">
+                <a href="#top" class="text-xl font-extrabold tracking-tight text-navy-900 md:text-2xl" aria-label="Minh Thư - về đầu trang">
+                    MINH THƯ<span class="text-accent-500">.</span>
+                </a>
+                <nav class="hidden items-center space-x-7 text-sm font-medium text-slate-600 md:flex" aria-label="Điều hướng chính">
+                    <a href="#about" class="transition-colors hover:text-accent-500">Giới thiệu</a>
+                    <a href="#experience" class="transition-colors hover:text-accent-500">Kinh nghiệm</a>
+                    <a href="#education" class="transition-colors hover:text-accent-500">Học vấn</a>
+                    <a href="#skills" class="transition-colors hover:text-accent-500">Kỹ năng</a>
+                    <a href="#activities" class="transition-colors hover:text-accent-500">Định hướng</a>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <a href="#contact" class="hidden items-center gap-2 rounded-full bg-navy-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-navy-800 sm:inline-flex">
+                        Liên hệ <i data-lucide="arrow-up-right" class="h-4 w-4" aria-hidden="true"></i>
+                    </a>
+                    <button id="mobile-menu-btn" type="button" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden" aria-label="Mở menu" aria-controls="mobile-menu" aria-expanded="false">
+                        <i data-lucide="menu" class="h-6 w-6" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <nav id="mobile-menu" class="hidden space-y-1 border-b border-slate-200 bg-white px-4 pb-4 pt-2 text-sm font-medium text-slate-700 md:hidden" aria-label="Điều hướng di động">
+            <a href="#about" class="block py-2 hover:text-accent-500">Giới thiệu</a>
+            <a href="#experience" class="block py-2 hover:text-accent-500">Kinh nghiệm</a>
+            <a href="#education" class="block py-2 hover:text-accent-500">Học vấn</a>
+            <a href="#skills" class="block py-2 hover:text-accent-500">Kỹ năng</a>
+            <a href="#activities" class="block py-2 hover:text-accent-500">Định hướng</a>
+            <a href="#contact" class="block py-2 font-semibold text-accent-600">Liên hệ</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="mx-auto max-w-6xl px-4 pb-16 pt-28 sm:px-6 md:pb-24 md:pt-36 lg:px-8">
+            <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+                <div class="space-y-6 lg:col-span-7">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-sky-200/80 bg-sky-50 px-3.5 py-1.5 text-xs font-semibold text-accent-600 sm:text-sm">
+                        <span class="h-2 w-2 animate-pulse rounded-full bg-accent-500"></span>
+                        Nhấp vào bong bóng để khám phá điều bất ngờ ✨
+                    </div>
+                    <h1 class="text-3xl font-extrabold leading-tight tracking-tight text-navy-900 sm:text-5xl lg:text-6xl">
+                        Xin chào, tôi là
+                        <span class="mt-1 block bg-gradient-to-r from-navy-900 via-navy-800 to-accent-500 bg-clip-text text-transparent">
+                            PHẠM NGỌC MINH THƯ
+                        </span>
+                    </h1>
+                    <p class="text-base font-semibold text-accent-600 sm:text-lg">
+                        Logistics &amp; Supply Chain Management <span aria-hidden="true">|</span> E-commerce <span aria-hidden="true">|</span> Sales Operations
+                    </p>
+                    <p class="max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+                        Cử nhân Logistics &amp; Quản lý chuỗi cung ứng với 1 năm kinh nghiệm hỗ trợ kinh doanh và điều phối vận hành mảng ẩm thực cao cấp (HoReCa). Hiện đang theo đuổi văn bằng hai Thương mại điện tử tại UEH với định hướng kết nối chuỗi cung ứng và chuyển đổi số.
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <a href="#experience" class="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-6 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-navy-800 hover:shadow-lg">
+                            Xem kinh nghiệm <i data-lucide="briefcase" class="h-4 w-4" aria-hidden="true"></i>
+                        </a>
+                        <a href="mailto:tee01265@gmail.com" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 font-semibold text-navy-900 transition-colors hover:bg-slate-100">
+                            Gửi email ngay <i data-lucide="mail" class="h-4 w-4" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="flex justify-center lg:col-span-5">
+                    <div class="relative flex h-72 w-72 items-center justify-center sm:h-80 sm:w-80 md:h-96 md:w-96">
+                        <div class="absolute inset-0 rotate-6 rounded-3xl bg-gradient-to-tr from-sky-200 to-indigo-100"></div>
+                        <div class="relative flex h-full w-full items-center justify-center overflow-hidden rounded-3xl border border-slate-100 bg-white p-2 shadow-xl">
+                            <div class="flex h-full w-full items-center justify-center rounded-2xl bg-gradient-to-br from-sky-50 via-white to-indigo-100">
+                                <span class="text-8xl font-extrabold tracking-tighter text-accent-600 sm:text-9xl" aria-label="Minh Thư">MT</span>
+                            </div>
+                        </div>
+                        <div class="absolute -left-4 top-8 flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-white px-4 py-2.5 shadow-lg">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-accent-600"><i data-lucide="award" class="h-5 w-5" aria-hidden="true"></i></div>
+                            <div><p class="text-xs font-medium text-slate-500">Ngoại ngữ</p><p class="text-sm font-bold text-navy-900">IELTS 6.0</p></div>
+                        </div>
+                        <div class="absolute -right-4 bottom-8 flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-white px-4 py-2.5 shadow-lg">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><i data-lucide="trending-up" class="h-5 w-5" aria-hidden="true"></i></div>
+                            <div><p class="text-xs font-medium text-slate-500">Kinh nghiệm B2B</p><p class="text-sm font-bold text-navy-900">Sales Operations</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="border-y border-slate-200/60 bg-white py-16 md:py-24">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <span class="text-xs font-bold uppercase tracking-widest text-accent-500">Về bản thân</span>
+                    <h2 class="mt-2 text-2xl font-extrabold text-navy-900 sm:text-3xl">Giao thoa giữa chuỗi cung ứng &amp; thương mại số</h2>
+                </div>
+                <div class="rounded-3xl border border-slate-200/70 bg-slate-50 p-6 sm:p-10">
+                    <p class="mx-auto max-w-3xl text-center leading-relaxed text-slate-600">
+                        Nền tảng Logistics giúp tôi nhìn nhận hoạt động kinh doanh qua dòng chảy hàng hóa và quy trình vận hành. Việc học thêm Thương mại điện tử mở rộng góc nhìn về cách công nghệ kết nối doanh nghiệp với khách hàng. Tôi mong muốn tiếp tục phát triển tại điểm giao giữa hai lĩnh vực này.
+                    </p>
+                    <div class="mt-8 grid gap-4 sm:grid-cols-3">
+                        <div class="card-hover rounded-2xl border border-slate-200 bg-white p-5">
+                            <i data-lucide="boxes" class="mb-3 h-6 w-6 text-accent-600" aria-hidden="true"></i>
+                            <h3 class="font-bold text-navy-900">Chuỗi cung ứng</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">Nền tảng học thuật về Logistics và Quản lý chuỗi cung ứng.</p>
+                        </div>
+                        <div class="card-hover rounded-2xl border border-slate-200 bg-white p-5">
+                            <i data-lucide="handshake" class="mb-3 h-6 w-6 text-accent-600" aria-hidden="true"></i>
+                            <h3 class="font-bold text-navy-900">Vận hành kinh doanh</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">Kinh nghiệm hỗ trợ kinh doanh và điều phối trong lĩnh vực HoReCa.</p>
+                        </div>
+                        <div class="card-hover rounded-2xl border border-slate-200 bg-white p-5">
+                            <i data-lucide="shopping-cart" class="mb-3 h-6 w-6 text-accent-600" aria-hidden="true"></i>
+                            <h3 class="font-bold text-navy-900">Thương mại điện tử</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">Đang theo học văn bằng hai tại UEH, hướng tới kết nối kinh doanh và công nghệ.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="py-16 md:py-24">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <span class="text-xs font-bold uppercase tracking-widest text-accent-500">Hành trình nghề nghiệp</span>
+                    <h2 class="mt-2 text-2xl font-extrabold text-navy-900 sm:text-3xl">Kinh nghiệm làm việc</h2>
+                </div>
+                <article class="relative rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-9">
+                    <div class="absolute bottom-8 left-0 top-8 w-1 rounded-r-full bg-accent-500" aria-hidden="true"></div>
+                    <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                        <div>
+                            <p class="text-sm font-semibold text-accent-600">HoReCa · 1 năm kinh nghiệm</p>
+                            <h3 class="mt-2 text-xl font-bold text-navy-900">Hỗ trợ kinh doanh &amp; điều phối vận hành</h3>
+                            <p class="mt-1 text-slate-600">Mảng ẩm thực cao cấp (HoReCa)</p>
+                        </div>
+                        <span class="inline-flex w-fit items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-accent-600">
+                            <i data-lucide="briefcase-business" class="h-4 w-4" aria-hidden="true"></i> Sales Operations
+                        </span>
+                    </div>
+                    <p class="mt-6 max-w-3xl leading-relaxed text-slate-600">
+                        Hỗ trợ hoạt động kinh doanh và phối hợp các công việc vận hành trong môi trường dịch vụ B2B. Kinh nghiệm này giúp tôi hiểu rõ hơn về nhịp độ vận hành thực tế và tầm quan trọng của việc kết nối các đầu việc trong doanh nghiệp.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section id="education" class="border-y border-slate-200/60 bg-white py-16 md:py-24">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <span class="text-xs font-bold uppercase tracking-widest text-accent-500">Nền tảng chuyên môn</span>
+                    <h2 class="mt-2 text-2xl font-extrabold text-navy-900 sm:text-3xl">Học vấn</h2>
+                </div>
+                <div class="grid gap-5 md:grid-cols-2">
+                    <article class="card-hover rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
+                        <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-accent-600"><i data-lucide="graduation-cap" class="h-6 w-6" aria-hidden="true"></i></div>
+                        <p class="text-sm font-semibold text-accent-600">Đã tốt nghiệp</p>
+                        <h3 class="mt-2 text-lg font-bold text-navy-900">Logistics &amp; Quản lý chuỗi cung ứng</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600">Bằng cử nhân, cung cấp nền tảng về logistics và quản lý chuỗi cung ứng.</p>
+                    </article>
+                    <article class="card-hover rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
+                        <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600"><i data-lucide="book-open-check" class="h-6 w-6" aria-hidden="true"></i></div>
+                        <p class="text-sm font-semibold text-accent-600">Đang theo học</p>
+                        <h3 class="mt-2 text-lg font-bold text-navy-900">Văn bằng hai Thương mại điện tử</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600">Đại học Kinh tế TP. Hồ Chí Minh (UEH).</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="py-16 md:py-24">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <span class="text-xs font-bold uppercase tracking-widest text-accent-500">Thế mạnh</span>
+                    <h2 class="mt-2 text-2xl font-extrabold text-navy-900 sm:text-3xl">Kỹ năng &amp; năng lực</h2>
+                </div>
+                <div class="grid gap-5 md:grid-cols-2">
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+                        <h3 class="mb-5 flex items-center gap-2 font-bold text-navy-900"><i data-lucide="layers-3" class="h-5 w-5 text-accent-600" aria-hidden="true"></i> Lĩnh vực chuyên môn</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="rounded-full bg-sky-50 px-3 py-2 text-sm font-medium text-slate-700">Logistics</span>
+                            <span class="rounded-full bg-sky-50 px-3 py-2 text-sm font-medium text-slate-700">Quản lý chuỗi cung ứng</span>
+                            <span class="rounded-full bg-sky-50 px-3 py-2 text-sm font-medium text-slate-700">Thương mại điện tử</span>
+                            <span class="rounded-full bg-sky-50 px-3 py-2 text-sm font-medium text-slate-700">Sales Operations</span>
+                            <span class="rounded-full bg-sky-50 px-3 py-2 text-sm font-medium text-slate-700">HoReCa / B2B</span>
+                        </div>
+                    </div>
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+                        <h3 class="mb-5 flex items-center gap-2 font-bold text-navy-900"><i data-lucide="languages" class="h-5 w-5 text-accent-600" aria-hidden="true"></i> Ngoại ngữ</h3>
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
+                            <div><p class="font-semibold text-navy-900">Tiếng Anh</p><p class="mt-1 text-sm text-slate-600">Chứng chỉ IELTS</p></div>
+                            <span class="rounded-xl bg-white px-4 py-2 font-bold text-accent-600 shadow-sm">6.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="activities" class="border-y border-slate-200/60 bg-white py-16 md:py-24">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <div class="grid items-center gap-8 md:grid-cols-12">
+                    <div class="md:col-span-7">
+                        <span class="text-xs font-bold uppercase tracking-widest text-accent-500">Định hướng phát triển</span>
+                        <h2 class="mt-2 text-2xl font-extrabold text-navy-900 sm:text-3xl">Kết nối vận hành với chuyển đổi số</h2>
+                        <p class="mt-4 max-w-2xl leading-relaxed text-slate-600">
+                            Tôi quan tâm đến cách thương mại điện tử và công nghệ có thể hỗ trợ quy trình kinh doanh, đồng thời tạo ra sự kết nối hiệu quả hơn giữa chuỗi cung ứng và khách hàng. Đây là hướng tôi đang tiếp tục tìm hiểu và phát triển qua việc học tập.
+                        </p>
+                    </div>
+                    <div class="md:col-span-5">
+                        <div class="rounded-3xl bg-navy-900 p-7 text-white sm:p-8">
+                            <i data-lucide="compass" class="mb-5 h-8 w-8 text-sky-300" aria-hidden="true"></i>
+                            <p class="text-sm font-semibold text-sky-200">Mối quan tâm</p>
+                            <p class="mt-2 text-xl font-bold leading-snug">Logistics · Thương mại điện tử · Vận hành kinh doanh</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-16 md:py-24">
+            <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+                <span class="text-xs font-bold uppercase tracking-widest text-accent-500">Liên hệ</span>
+                <h2 class="mt-2 text-2xl font-extrabold text-navy-900 sm:text-3xl">Cùng kết nối nhé!</h2>
+                <p class="mx-auto mt-4 max-w-2xl leading-relaxed text-slate-600">
+                    Tôi luôn sẵn sàng tìm hiểu những cơ hội phù hợp trong lĩnh vực Logistics, thương mại điện tử và vận hành kinh doanh.
+                </p>
+                <div class="mt-8 flex flex-wrap justify-center gap-3">
+                    <a href="mailto:tee01265@gmail.com" class="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-5 py-3 font-semibold text-white transition-colors hover:bg-navy-800">
+                        <i data-lucide="mail" class="h-4 w-4" aria-hidden="true"></i> tee01265@gmail.com
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white py-6">
+        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 text-sm text-slate-500 sm:flex-row sm:px-6 lg:px-8">
+            <p>© <span id="current-year"></span> Phạm Ngọc Minh Thư</p>
+            <a href="#top" class="inline-flex items-center gap-1 font-medium transition-colors hover:text-accent-600">Về đầu trang <i data-lucide="arrow-up" class="h-4 w-4" aria-hidden="true"></i></a>
+        </div>
+    </footer>
+    <script>
+        const menuButton = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuButton.addEventListener('click', () => {
+            const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+            menuButton.setAttribute('aria-expanded', String(!isExpanded));
+            menuButton.setAttribute('aria-label', isExpanded ? 'Mở menu' : 'Đóng menu');
+            mobileMenu.classList.toggle('hidden', isExpanded);
+        });
+
+        mobileMenu.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                menuButton.setAttribute('aria-expanded', 'false');
+                menuButton.setAttribute('aria-label', 'Mở menu');
+            });
+        });
+
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        const bubbleCanvas = document.getElementById('bubble-canvas');
+        const bubbleContext = bubbleCanvas.getContext('2d');
+        const bubbleMessage = document.getElementById('bubble-message');
+        const music = document.getElementById('bg-music');
+        const musicButton = document.getElementById('music-toggle-btn');
+        const musicIcon = document.getElementById('music-icon');
+        const musicStatus = document.getElementById('music-status-text');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const bubbleMessages = [
+            'Mỗi hành trình lớn đều bắt đầu từ một bước nhỏ ✨',
+            'Kiên trì học hỏi, cơ hội tốt sẽ đến 🌱',
+            'Kết nối đúng cách tạo nên giá trị bền vững 💙',
+            'Chúc bạn một ngày thật nhiều năng lượng 🌟',
+            'Cảm ơn bạn đã ghé thăm portfolio của Thư!'
+        ];
+        let bubbles = [];
+        let canvasWidth = 0;
+        let canvasHeight = 0;
+        let messageTimeout;
+        let animationFrame;
+
+        function createBubble() {
+            const radius = 12 + Math.random() * 18;
+            return {
+                x: Math.random() * canvasWidth,
+                y: Math.random() * canvasHeight,
+                radius,
+                speed: 0.35 + Math.random() * 0.75,
+                drift: (Math.random() - 0.5) * 0.45,
+                phase: Math.random() * Math.PI * 2,
+                hue: 190 + Math.random() * 45
+            };
+        }
+
+        function resizeBubbleCanvas() {
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            bubbleCanvas.width = Math.round(canvasWidth * pixelRatio);
+            bubbleCanvas.height = Math.round(canvasHeight * pixelRatio);
+            bubbleContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            const desiredCount = Math.min(24, Math.max(10, Math.round(canvasWidth / 65)));
+            while (bubbles.length < desiredCount) bubbles.push(createBubble());
+            bubbles.length = desiredCount;
+            drawBubbles(false);
+        }
+
+        function drawBubbles(animate) {
+            bubbleContext.clearRect(0, 0, canvasWidth, canvasHeight);
+            bubbles.forEach((bubble) => {
+                if (animate) {
+                    bubble.y += bubble.speed;
+                    bubble.x += bubble.drift + Math.sin(bubble.phase) * 0.22;
+                    bubble.phase += 0.015;
+                    if (bubble.y - bubble.radius > canvasHeight) {
+                        bubble.y = -bubble.radius;
+                        bubble.x = Math.random() * canvasWidth;
+                    }
+                    if (bubble.x < -bubble.radius) bubble.x = canvasWidth + bubble.radius;
+                    if (bubble.x > canvasWidth + bubble.radius) bubble.x = -bubble.radius;
+                }
+
+                const gradient = bubbleContext.createRadialGradient(
+                    bubble.x - bubble.radius * 0.35,
+                    bubble.y - bubble.radius * 0.4,
+                    1,
+                    bubble.x,
+                    bubble.y,
+                    bubble.radius
+                );
+                gradient.addColorStop(0, `hsla(${bubble.hue}, 95%, 95%, 0.20)`);
+                gradient.addColorStop(1, `hsla(${bubble.hue}, 85%, 70%, 0.10)`);
+                bubbleContext.beginPath();
+                bubbleContext.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+                bubbleContext.fillStyle = gradient;
+                bubbleContext.fill();
+                bubbleContext.strokeStyle = `hsla(${bubble.hue}, 85%, 72%, 0.38)`;
+                bubbleContext.lineWidth = 1.2;
+                bubbleContext.stroke();
+                bubbleContext.beginPath();
+                bubbleContext.arc(
+                    bubble.x - bubble.radius * 0.28,
+                    bubble.y - bubble.radius * 0.3,
+                    Math.max(2, bubble.radius * 0.12),
+                    0,
+                    Math.PI * 2
+                );
+                bubbleContext.fillStyle = 'rgba(255, 255, 255, 0.65)';
+                bubbleContext.fill();
+            });
+
+            if (animate) animationFrame = window.requestAnimationFrame(() => drawBubbles(true));
+        }
+
+        function showBubbleMessage(message) {
+            bubbleMessage.textContent = message;
+            bubbleMessage.classList.remove('hidden');
+            window.clearTimeout(messageTimeout);
+            messageTimeout = window.setTimeout(() => bubbleMessage.classList.add('hidden'), 3200);
+        }
+
+        window.addEventListener('pointerdown', (event) => {
+            if (event.target.closest('a, button, input, textarea, select, [role="button"]')) return;
+            const hitIndex = bubbles.findIndex((bubble) => {
+                const dx = event.clientX - bubble.x;
+                const dy = event.clientY - bubble.y;
+                return dx * dx + dy * dy <= bubble.radius * bubble.radius;
+            });
+            if (hitIndex === -1) return;
+
+            bubbles.splice(hitIndex, 1);
+            bubbles.push(createBubble());
+            showBubbleMessage(bubbleMessages[Math.floor(Math.random() * bubbleMessages.length)]);
+            if (reducedMotion.matches) drawBubbles(false);
+        });
+
+        window.addEventListener('resize', resizeBubbleCanvas);
+        reducedMotion.addEventListener('change', () => {
+            window.cancelAnimationFrame(animationFrame);
+            drawBubbles(!reducedMotion.matches);
+        });
+        resizeBubbleCanvas();
+        if (!reducedMotion.matches) drawBubbles(true);
+
+        music.addEventListener('error', () => {
+            music.pause();
+            musicButton.setAttribute('aria-pressed', 'false');
+            musicButton.setAttribute('aria-label', 'Bật nhạc nền');
+            musicIcon.classList.remove('music-playing');
+            musicStatus.textContent = 'Không tìm thấy music.mp3';
+        });
+
+        musicButton.addEventListener('click', async () => {
+            if (!music.paused) {
+                music.pause();
+                musicButton.setAttribute('aria-pressed', 'false');
+                musicButton.setAttribute('aria-label', 'Bật nhạc nền');
+                musicIcon.classList.remove('music-playing');
+                musicStatus.textContent = 'Nhạc nền: Tắt';
+                return;
+            }
+
+            if (!music.querySelector('source[src]') && !music.hasAttribute('src')) {
+                musicStatus.textContent = 'Thêm file nhạc vào thẻ audio';
+                return;
+            }
+
+            try {
+                await music.play();
+                musicButton.setAttribute('aria-pressed', 'true');
+                musicButton.setAttribute('aria-label', 'Tắt nhạc nền');
+                musicIcon.classList.add('music-playing');
+                musicStatus.textContent = 'Nhạc nền: Đang phát';
+            } catch (error) {
+                musicStatus.textContent = 'Không thể phát nhạc; kiểm tra file audio';
+            }
+        });
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
